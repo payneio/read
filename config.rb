@@ -147,11 +147,11 @@ end
 # Deploy settings
 ###
 
-# ftp deployment configuration. 
-# activate :deploy do |deploy|
-#   deploy.method = :ftp
-#   deploy.host = "ftp-host"
-#   deploy.user = "ftp-user"
-#   deploy.password = "ftp-password"
-#   deploy.path = "ftp-path"
-# end
+activate :deploy do |deploy|
+  deploy.method = :rsync
+  deploy.host   = 'read.payne.io'
+  deploy.path   = '/home/payne/read'
+  deploy.user   = 'payne'
+  # deploy.clean = true # remove orphaned files on remote host, default: false
+  # deploy.flags = '-rltgoDvzO --no-p --del' # add custom flags, default: -avz
+end
