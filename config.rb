@@ -12,7 +12,7 @@ activate :blog do |blog|
   # Matcher for blog source files
   blog.sources = "posts/{year}-{month}-{day}-{title}.html"
   # blog.taglink = "tags/{tag}.html"
-  # blog.layout = "layout"
+  blog.layout = "layout"
   # blog.summary_separator = /(READMORE)/
   # blog.summary_length = 250
   # blog.year_link = "{year}.html"
@@ -66,18 +66,6 @@ set :markdown, :tables => true, :autolink => true, :gh_blockcode => true, :fence
 set :markdown_engine, :redcarpet
 set :asciidoc_attributes, %w(source-highlighter=coderay coderay-css=style imagesdir=images)
 
-# Per-page layout changes:
-#
-# With no layout
-# page "/path/to/file.html", layout: false
-#
-# With alternative layout
-# page "/path/to/file.html", layout: :otherlayout
-#
-# A path which all have the same layout
-# with_layout :admin do
-#   page "/admin/*"
-# end
 page "/posts/*", layout: :article
 
 # Proxy pages (http://middlemanapp.com/dynamic-pages/)
@@ -105,12 +93,12 @@ activate :livereload
 # Site Settings
 ###
 # Set site setting, used in helpers / sitemap.xml / feed.xml.
-set :site_url, 'http://blog.url.com'
-set :site_author, 'Blog author'
-set :site_title, 'Blog title'
-set :site_description, 'Blog description'
-# set @analytics_account, like "XX-12345678-9"
-@analytics_account = false
+set :site_url, 'http://read.payne.io'
+set :site_author, 'Paul Payne'
+set :site_title, 'Read'
+set :site_description, 'Posts by Paul Payne'
+
+@analytics_account = "UA-38495728-2"
 
 # Asset Settings
 set :css_dir, 'css'
@@ -146,16 +134,9 @@ end
 
 # Build-specific configuration
 configure :build do
-  # For example, change the Compass output style for deployment
   activate :minify_css
-
-  # Minify Javascript on build
   activate :minify_javascript
-
-  # Enable cache buster
-  # activate :asset_hash
-
-  # Use relative URLs
+  activate :asset_hash # cache buster
   activate :relative_assets
 
   # Or use a different image path
