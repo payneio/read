@@ -1,2 +1,3 @@
 //= require jquery/jquery
-//= require_tree .
+//= require app
+//= require ie8
