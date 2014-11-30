@@ -78,6 +78,7 @@ set :asciidoc_attributes, %w(source-highlighter=coderay coderay-css=style images
 # with_layout :admin do
 #   page "/admin/*"
 # end
+page "/posts/*", layout: :article
 
 # Proxy pages (http://middlemanapp.com/dynamic-pages/)
 # proxy "/this-page-has-no-template.html", "/template-file.html", locals: {
