@@ -7,6 +7,10 @@ body {
   margin-top: $marginTopBody;
 }
 
+a {
+  text-decoration: underline;
+}
+
 #read-intro {
   margin-top: -20px;
   margin-bottom: 60px;
