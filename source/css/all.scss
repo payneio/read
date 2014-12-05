@@ -37,3 +37,23 @@ a {
 .post_date {
   color: #999;
 }
+
+.imageblock {
+  .content {
+  }
+  .title {
+    padding: 2px;
+    text-style: all-caps;
+  }
+  &.right {
+    float: right;
+    margin-left: 20px;
+  }
+  &.left {
+    float: left;
+    margin-right: 20px;
+  }
+  &.center {
+    margin: 30px auto;
+  }
+}
