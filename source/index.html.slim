@@ -13,7 +13,7 @@ layout: index
         = article.title
     - if article.data.image_src
       img.img-responsive src=article.data.image_src
-    = article.summary
+    = article.data.summary || article.summary
     / a.btn.btn-default.pull-right href=article.url
     /   | Read 
     /   span.glyphicon.glyphicon-chevron-right
