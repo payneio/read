@@ -2,7 +2,7 @@
 All posts (copy written by me in or outside the posts directory) are Copyright &copy; Paul Payne.
 
 ###Non-Posts
-All modifications I've made to the middleman theme and software are MIT License, as are the original theme files from Biblchor:
+All modifications I've made to the middleman theme and software are MIT License, as are the original theme files from Biblichor:
 
 The MIT License (MIT)
 
