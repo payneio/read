@@ -42,7 +42,5 @@ html
                   = article.date.strftime('%b %e')
         #disqus_thread
         hr
-          p.text-center
-            | 2014 
-            = link_to "#{site_title}", "/"          
+        = partial "partials/footer"
     = javascript_include_tag  "all"

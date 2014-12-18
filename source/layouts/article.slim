@@ -22,8 +22,9 @@ html
             p.post_date
               = current_article.date.strftime('%e %B, %Y')
 
-            h1
-              = current_article.title
+            - unless current_article.data.show_title === false
+              h1
+                = current_article.title
 
             / - current_article.tags.each do |tag|
             /   small.label.label-default
@@ -35,9 +36,7 @@ html
           = yield
           #disqus_thread
           hr
-            p.text-center
-              | 2014 
-              = link_to "#{site_title}", "/"
+          = partial "partials/footer"
         .col-md-2
     = javascript_include_tag  "all"
     = javascript_include_tag "disqus"
