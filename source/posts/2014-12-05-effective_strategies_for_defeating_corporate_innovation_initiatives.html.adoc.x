@@ -1,7 +1,8 @@
 ---
 title: Effective Strategies for Defeating Corporate Innovation Initiatives
+show_title: false
 tags:
-summary: Is your company jumping on the “Innovation” bandwagon? Innovation groups are one of the more recent management fads. Like all such management fads, you can expect the excitement to fade over time. In the meantime, by employing these simple, yet effective strategies you can ensure that this short-term thinking won’t disrupt your time-tested corporate management structure.
+summary: Is your company jumping on the innovation bandwagon? Innovation groups are one of the more recent management fads. Like all management fads, you can expect the excitement to fade over time. In the meantime, employing these simple strategies will keep short-sighted thinking from disrupting your time-tested corporate management structure.
 ---
 
 ////
@@ -12,6 +13,10 @@ v1.0, 2014-11-22
 :homepage: http://read.payne.io
 :doctype: article
 ////
+
+image:innovation-initiatives.jpg[role="responsive", title="Effective Strategies for Defeating Corporate Innovation Initiatives"]
+
+== If It's So Innovative, Why Is Everyone Doing It?
 
 Is your company jumping on the “Innovation” bandwagon? Did an executive team retreat just result in a new innovation “initiative”? Do you have to deal with one of the newly christened “Innovation Labs” popping up in companies in every industry?
 
