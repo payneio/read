@@ -1,7 +1,7 @@
 ---
 title: A Primer on Continuous Improvement
 tags: [essay, primer]
-summary: This is an easy-to-read introduction to the topic of Continuous Improvement. I aim to provide a quick foundation for practitioners to begin their investigation and application of Continuous Improvement concepts.
+summary: Continuous Improvement is a popular field of practice encompassing a handful of distinct, yet ideologically similar methodologies. For the uninitiated, it can be confusing understanding how they all fit together. This is a quick overview of the history and core concepts of Continuous Improvement. I also discuss some of it's limitations in the hopes that those applying CI will do so soberly.
 ---
 
 [quote, neither Deming nor Drucker]
@@ -41,7 +41,10 @@ While the US discarded scientific and mathematical methods of production in the 
 
 Lean expects line-workers to focus on eliminating waste (*muda*) from their local processes while managers fill a coaching role. By creating a shared culture of *Kaizen* (Japanese for "improvement"), the many small improvements by line-workers bubble up to organization-wide efficiencies. 
 
-"All we are doing is looking at the timeline from the moment a customer gives us an order to the point when we collect the cash. And we are reducing that timeline by removing the non value-added wastes." -- Taiichi Ohno, Toyota
+[quote, Taiichi Ohno (Toyota)]
+____
+"All we are doing is looking at the timeline from the moment a customer gives us an order to the point when we collect the cash. And we are reducing that timeline by removing the non value-added wastes."
+____
 
 Lean is primarily a management system for "the absolute elimination of *waste*." Waste being defined as:
 
@@ -112,7 +115,7 @@ Drucker recognized another limitation of CI. Namely, that much of the improvemen
 
 Furthermore, as any statistician will tell you, creating models is a tricky business. Not only can you have limited data, wrong data, irrelevant data, underfit the data or overfit the data, the most fundamental problem is that relying on statistics gives you no absolute guarantee that your model may, at some point, just stop working. Deming said, "Every theory is correct in its own world, but the problem is that the theory may not make contact with this world."
 
-And in the case of quickly changing systems where inputs, requirements and technologies are ever-changing, CI may never get even get off the ground.
+And in the case of quickly changing systems where inputs, requirements and technologies are ever-changing, CI may never even get off the ground.
 
 The greatest limitation, perhaps even danger, I see with CI is that it has the potential to lull an organization into a self-referential sleep. Deming called it out: "It is a mistake to assume that if everybody does his job, it will be all right. The whole system may be in trouble." A system can be optimized locally and yet be a complete waste globally.
 
