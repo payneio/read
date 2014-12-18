@@ -1,7 +1,9 @@
-# read.payne.io blog
+# read.payne.io 
 
-This is my current blog setup. I've added it to github to share to anyone else that may be looking for an 
-easy-to-manage yet quite customizable staticly generated blog.
+This is my current personal online publishing setup. I've added it to github to share to anyone else that may be looking for an 
+easy-to-manage yet quite customizable statically generated publishing site\*. 
+
+\*I'm avoiding just calling it a "blog" because I'm planning on building in more features... like pdf generation.
 
 # Thanks
 
@@ -29,9 +31,10 @@ Also:
 
 ##Installation
 
-1. If you're just getting started, install the `middleman` gem
+1. You'll need ruby (I use 2.1.2) and rubygems (I use 2.2.2).
+1. Install the `middleman` gem
 1. Download/clone blog-boostrap to `.middleman/blog-bootstrap`: 
-1. Download/clone this repo
+1. Download/clone this repo to wherever you put your projects.
 1. Install the assets in the `bower_components/` directory.
 
 ```shell
