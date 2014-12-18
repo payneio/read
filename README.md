@@ -53,7 +53,9 @@ Start up the middleman server to see the live-reloading changes to your blog loc
 middleman server
 ```
 
-Then, just write a new post in posts (in .md or .adoc). When ready to publish:
+Then, just write a new post in posts (in .md or .adoc). 
+
+When ready to publish:
 
 ```shell
 middleman build
@@ -88,9 +90,6 @@ set :site_subtitle, 'Blog subtitle'
  - [jQuery](http://jquery.com/)
  - [Respond.js](http://github.com/scottjehl/Respond)
 * If you want another assets, edit `bower.json` as you like, and simply ```bower install``` and include it like you would any other file in sprockets.
-
-##Requirements
-Confirmed in ruby 2.0.0p247, rubygem 2.0.3, middleman 3.2.2
 
 ###Helpers configuration, etc.
 
