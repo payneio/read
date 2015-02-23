@@ -9,7 +9,6 @@ activate :blog do |blog|
   # blog.prefix = "blog"
 
   # blog.permalink = "{year}/{month}/{day}/{title}.html"
-  # Matcher for blog source files
   blog.sources = "posts/{year}-{month}-{day}-{title}.html"
   # blog.taglink = "tags/{tag}.html"
   blog.layout = "layout"
@@ -96,7 +95,7 @@ activate :livereload
 set :site_url, 'http://read.payne.io'
 set :site_author, 'Paul Payne'
 set :site_title, 'Read'
-set :site_description, 'Posts by Paul Payne'
+set :site_description, 'Paul Payne writes about engineering, computer science and innovation from Seattle, WA.'
 
 @analytics_account = "UA-38495728-2"
 
