@@ -1,0 +1,6 @@
+RewriteEngine on
+
+RewriteCond %{HTTP_HOST} ^www.read.payne.io$ [NC]
+RewriteCond %{HTTP_HOST} !^$
+RewriteRule ^/?(.*)      http://read.payne.io/$1 [R=301,L]
+
