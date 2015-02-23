@@ -1,0 +1,165 @@
+---
+title: Breaking Data Out of the Enterprise, Part 1
+summary: A two part series on using Docker, Bash and old-school Oracle clients to move big enterprise data super-fast into no-sql Dynamo
+---
+
+It's a common scenario today to have loads of data locked up in an enterprise data warehouse or in a database backing an enterprise application. This data is all but inaccessible to all the glories of "the cloud" -- data pipelines, micro-services, hadoop clusters, managed services, materialized views, distributed log systems, etc. Let's, for the moment, ignore the challenges of Security and Privacy in relation to moving enterprise data. If and when you are ready; you'll still face the mechanics of how you shuttle giga/tera/petabytes of data from your enterprise to another data service.
+
+Recently, we needed to move 50ish million rows of Oracle 9 data to AWS Dynamo. I haven't used much enterprise-y software for over a decade. I thought it wouldn't be that big of a deal, but soon found out why some of my colleagues looked at me like it was a ridiculous thought--they were used to using the http://www.oracle.com/technetwork/developer-tools/sql-developer/overview/index.html[Oracle SQL Developer] to run a query and then "right-click to download" to a CSV file. This achieves maybe 150 rows/second which would take about 4 days (if it completed). Why were they using SQL Developer? Apparently because installing six year old http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html[Oracle command-line clients] was a bit of black magic. 
+
+The first part of this series describes how we achieve 57,000 rows/second data extraction from our enterprise database with a single command on any computer in our network (with the only requirement being the installation of the Docker daemon). 
+
+```
+docker run -e ORACLE_USERNAME=me -e ORACLE_PASSWORD=my_password -v `pwd`/tmp:/var/pullfromoracle/data nordstrom/pullfromoracle:latest pull_mytable.sh
+```
+
+_TL;DR: We wrapped the Oracle SQL*Plus client, with all the necessary libraries, scripts and configuration in a Docker container and parallelized a hundred requests in Bash_
+
+The second part of this series will describe how we got moved all that extracted data into AWS Dynamo.
+
+== Oracle SQL*Plus installation
+The http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html[Oracle SQL*Plus Instant Client] is a small utility with annoyingly opinionated particularities. First, you need to get the right build for your OS and architecture (they make OSX, Linux and Win in 32 and 64-bit variations). Then you need to get a release compatible with your Oracle database; I needed data from an Oracle 9 database, so I had to use a version of SQL*Plus between 9 and 11.2 (backwards-compatibility was broken in 11.2). I don't know where you will get this if you're on OSX, it is no longer on Oracle's site. Then, you need to grab the matching versions of the Instant Client libraries; most of which should have been included in your original Instant Client download. However, some dependency libraries may also need to be obtained. On Ubuntu, I also needed `libaio.so.1`. Finally, you need to set an LD_LIBRARY_PATH environment variable to point to your Oracle libraries and make sure `sqlplus` is in your PATH environment variable. 
+
+If all this sounds like a bit much just to connect to a database, hold on, we're not done yet. After we get the db CLI working, we need to configure the db connection. Oracle does this through something called a "service name" and expects it to be defined in a specific file in a specific location in your ORACLE_HOME path: http://www.orafaq.com/wiki/Tnsnames.ora[tnsnames.ora]. Alternatively, you can put this all in your command line every time, but it gets tedious.
+
+DB admins will roll their eyes when I say this all took me two days and attempts on three different OSes to get the right mix of requirements to finally get to the point where I could connect to our db and issue a query. I was eager to see if I could wrap all this complexity up in a Dockerfile (I could! Read on).
+
+== SQL script
+With the client finally connecting to the Oracle db, I could finally write me some http://www.oracle.com/technetwork/database/features/plsql/index.html[PL/SQL]. This was pretty straight-forward, except for how to get the data into a file and how to format it. 
+
+To get the data into a file, I first tried just redirecting the standard output to a file. Unfortunately, no combination of optional headers seemed to be able to eliminate all the extraneous output. By default, SQL*Plus shows table headers with ASCII-art dividers, tabs out fields, echos queries, and generally acts like it was nve intended to be used in an automated fashion. I abandonded my redirection attempts and found success with the PL/SQL http://docs.oracle.com/cd/B19306_01/server.102/b14357/ch12043.htm[SPOOL] command. 
+
+I went back and forth for awhile on formatting; initially trying a light version of CSV. I quickly descended into escaping-hell trying to remove whitespace, escape single and double quotes both in the script and during post-processing using `sed`. Then, while getting acquainted with Dynamo db's http://docs.aws.amazon.com/datapipeline/latest/DeveloperGuide/dp-importexport-ddb-pipelinejson-verifydata2.html[data export file format] I hit upon the apparently decades-old idea of using control-characters for delimiting fields. Yeah, there are specific ASCII codes meant, precisely, for http://en.wikipedia.org/wiki/Delimiter[delimiting fields]. I weep for the hours lost. So, I delimit my fields with ASCII 31 and forget all about escaping anything. Besides being stupendously simpler, it should be noted that each character I don't use in the SQL output saves tens of megabytes in the final data file.
+
+```
+set linesize 1000
+set pagesize 0
+set trimspool on
+set verify off 
+
+SPOOL data/table_data
+
+SELECT 
+  a_table.field1 || CHR(31) || 
+  a_table.field2 || CHR(31) || 
+  a_table.field3 || CHR(10)
+FROM a_table;
+      
+SPOOL OFF
+```
+CHR(10) is a newline character. `||` is concatenation. Concatenating fields this way with the CHR(31) separator eliminates all extraneous whitespace.
+
+== Bash script
+
+A Bash script pulls this all together in a nice easily reproducible way.
+
+```
+#!/bin/Bash
+
+startTime=$(date +%s)
+
+echo "Pulling data."
+sqlplus -L -S $ORACLE_USERNAME/$ORACLE_PASSWORD@YOUR_SID @sql/a_table.sql > /dev/null &
+
+endTime=$(date +%s)
+echo "Finished in $(($endTime - $startTime)) seconds."
+```
+_Yeah... you need to have your Oracle username and password in environment variables. We don't recommend checking these into source control._
+
+== Parallelization
+So, now I can run this Bash script and, around 8 hours later have all of my (for this table) 18 million rows in a local file.
+
+The problem for me with this, though, is that our enterprise database server is only available when I'm physically jacked-in to our network. And I am running this on my laptop. And I take my laptop home. And I want to run this every day.
+
+So I decided to parallelize this script. Here's the main tip for someone who has never done this before: pick some key in your table that contains a random integer, like a UUID or primary or foreign key, and add a `WHERE field LIKE '1%'` to the query. This will pull out all records that have that field starting with `1`. Now issue the same query for 2-9. If your field's integers are distributed evenly, you'll have roughly partitioned your data set into 9 even parts. You can run each of these queries in parallel to get all your data. In my case, one of our tables contained product UPC codes. Now, UPCs are not distributed evenly: the first characters _mean_ something. I think any UPC starting with `3` is a pharmaceutical, e.g. We were able to get an almost perfect distribution by partitioning on the _last_ digit. Also, I didn't want to simply parallelize 10 threads, I instead parallelized 100 by partitioning on the last _two_ digits.
+
+You may think issuing 100 unique queries in 100 different processes, waiting for them all to complete and then concatenating the results into a single file would be complex. You would be wrong, and it can be done in a few lines of Bash.
+
+```
+for i in `seq 0 9`; do
+  for j in `seq 0 9`; do
+    sqlplus -L -S $ORACLE_USERNAME/$ORACLE_PASSWORD@MY_SID @sql/data_with_a_field_ending_with.sql $i$j > /dev/null &
+  done
+done
+
+wait
+
+mkdir -p data/my_table
+cat data/tmp_data*.lst > data/my_table/`date +%Y%m%d%H%M`-my_table_data.data
+rm data/tmp_data*.lst
+```
+Notes:
+
+- the ampersand at the end of the sqlplus command line backgrounds the process allowing the for loops to start them all up, essentially, at the same time.
+- `wait`, true to it's name waits for all 100 processes to finish before continuing
+- check out the sweet timestamp in the concatenation. It lets me run this script non-destructively.
+- The .lst extension on the partioned data files is added by PL/SQL's `SPOOL` command. Whatever.
+
+The sql file only needs to be updated in two places, the `SPOOL` and the `WHERE` clause, to allow for the parallelization:
+
+```
+SPOOL data/table_data_&1_&2
+
+SELECT 
+  a_table.field1 || CHR(31) || 
+  a_table.field2 || CHR(31) || 
+  a_table.field3 || CHR(10)
+FROM a_table
+WHERE a_table.field1 LIKE '&1&2%';
+      
+SPOOL OFF
+```
+
+Now, when I run the Bash script, I can watch all 100 data files growing in size until, 18 minutes later, they are concatenated into a single file. 8 hours to 18 minutes with a few lines of Bash. 
+
+For any other data, I can simply copy and tweak the Bash and sql scripts. Wash. Rinse. Repeat.
+
+== Containerize
+
+All of this took way too much effort the first time around. I really don't want to repeat this on every machine I want to grab data with. For example, we want to automatically run this nightly (or weekly, whatever) on a utility machine (VM) somewhere in our data center. I don't relish the idea of installing all the Oracle toolset on the machine manually or creating and maintaining Chef or Puppet scripts. Furthermore, it would be nice if a coworker could tweak some scripts and pull down their data.
+
+http://docker.com[Docker] to the rescue. Here's my Dockerfile:
+
+```
+FROM nordstrom/baseimage-ubuntu:14.04
+
+ADD oracle /usr/lib/oracle
+ADD dist/lib /usr/lib
+ADD *.sh /bin/
+ADD sql /var/ip-pullfromoracle/sql
+
+ENV ORACLE_HOME /usr/lib/oracle
+ENV PATH /usr/lib/oracle/11.2/client64/bin/:$PATH
+ENV LD_LIBRARY_PATH /usr/lib/oracle/11.2/client64/lib/:$LD_LIBRARY_PATH
+
+VOLUME /var/pullfromoracle/data
+
+WORKDIR /var/pullfromoracle
+```
+
+I keep SQL*Plus and its libraries in the `oracle` directory. My lib dependency (`libaio.so.1`) is in the `dist` directory. My Bash scripts are put in the `/bin` so they can be run from anywhere. I set up all the paths. 
+
+The only tricky part is how we export the data volume. To make the exported data available, I set up a Docker volume at `/var/pullfromoracle/data` and set `/var/pullfromoracle` as my working directory. Since all of my Bash files expect the sql files to be in the sql directory, I can run the files locally (mostly for development) or in the Docker working directory. Similarly, since each sql file SPOOLs the data to a `data` directory, I can just expose the `data` directory as a volume and see all the data from the the Docker host.
+
+Once I build and push this Dockerfile to our registry, I am now able to go to any machine on our network that has Docker installed, and issue a single command:
+
+```
+docker run -e ORACLE_USERNAME=me -e ORACLE_PASSWORD=my_password \
+  -v `pwd`/tmp:/var/pullfromoracle/data \
+  nordstrom/pullfromoracle:latest \
+  pull_mytable.sh
+```
+
+This command will pull down the Docker image (the first time), and execute the pull_mytable.sh Bash script which begins 100 processes extracting data from our Oracle database.
+
+I can watch the files grow (very exciting... who needs http://mentalfloss.com/article/56755/16-amazing-facts-about-sea-monkeys[Sea-Monkeys]?):
+
+```
+watch ls -la tmp/
+```
+In my case, I wait a few hours and all my data will be sitting in my `tmp` directory.
+
+== Next Steps
+So now I have my data. In the next part of this series, I'll explain how I max out the available file-descripters on my laptop using https://github.com/awslabs/aws-sdk-go[Amazon Lab's new auto-generated Golang AWS client] to push my data into Dynamo faster than an entire Hadoop cluster.
+
+
