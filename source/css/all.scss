@@ -2,6 +2,7 @@
 
 @import "settings";
 @import "imports";
+@import "rouge";
 
 body {
   margin-top: $marginTopBody;
@@ -64,3 +65,12 @@ span.image.responsive img {
   height: auto;
   margin-bottom: 20px;
 }
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
