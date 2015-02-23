@@ -14,7 +14,7 @@ Here’s how we coded the change to our service and canary deployed it to our 5-
 
 ## Coding the Change
 
-The first 8 minutes were spent coding the requested feature. My coworker and I (not quite a pizza-box team) are fans of http://martinfowler.com/articles/microservices.html[microservice architecture] and keep our service code as small and single-minded as possible. This means we can make any changes we’d like to the service as long as the existing internal and external contracts are kept. It also means fewer mistakes are made as each service is simple and easy to reason about. This service, for example is a mere 218 lines of http://golang.org[Go] code. The function implementing our endpoint is in fact lines long. We needed to add 5 more (well-spaced) lines to implement the feature.
+The first 8 minutes were spent coding the requested feature. My coworker and I (not quite a pizza-box team) are fans of http://martinfowler.com/articles/microservices.html[microservice architecture] and keep our service code as small and single-minded as possible. This means we can make any changes we’d like to the service as long as the existing internal and external contracts are kept. It also means fewer mistakes are made as each service is simple and easy to reason about. This service, for example is a mere 218 lines of http://golang.org[Go] code. The function implementing our endpoint is in fact 15 lines long. We needed to add 5 more (well-spaced) lines to implement the feature.
 
 ## Compiling, Integrating and Packaging
 
